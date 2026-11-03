@@ -1,0 +1,19 @@
+# Python / Byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+django-env/
+venv/
+env/
+
+# Local SQLite Database
+db.sqlite3
+
+# VS Code editor settings
+.vscode/
+
+# Media / Static files
+media/
+staticfiles/
