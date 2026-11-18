@@ -40,6 +40,7 @@ def vote(request,question_id):
         )
     else:
         selected_choice.votes = F("votes")+1
+        #added some comments
         selected_choice.save()
 
         return HttpResponseRedirect(reverse("polls:result",args=(question.id,)))
