@@ -2,7 +2,7 @@ pipeline {
     agent {node{ label 'docker-node' }} // Runs this pipeline on any agent tagged with 'docker-node'
     
     environment {
-        IMAGE_NAME = "your-dockerhub-username/my-python-project"
+        IMAGE_NAME = "Admin/my-python-project"
     }
 
     stages {
