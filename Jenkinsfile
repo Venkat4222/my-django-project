@@ -13,7 +13,7 @@ pipeline {
         }
 
         
-}
+
 
 
         stage('Run Tests in Container') {
@@ -25,7 +25,7 @@ pipeline {
                 docker run --rm test-runner python manage.py test
             '''
         }
-    }
+        }
 
         stage('Build & Push Production Image') {
             steps {
