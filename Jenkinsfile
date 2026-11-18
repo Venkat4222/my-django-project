@@ -13,15 +13,13 @@ pipeline {
         }
 
         stage('Run Tests in Container') {
-            steps {
-                sh '''
-                    # Build a temporary test container image
-                    docker build -t test-runner .
-                    # Run your test suite inside the container
-                    docker run --rm test-runner pytest
-                '''
-            }
-        }
+    steps {
+        sh '''
+            docker build -t test-runner .
+            docker run --rm -e DJANGO_SETTINGS_MODULE=mysite.settings test-runner pytest
+        '''
+    }
+}
 
         stage('Build & Push Production Image') {
             steps {
