@@ -14,17 +14,15 @@ pipeline {
 
         
 
-
-
         stage('Run Tests in Container') {
             steps {
             sh '''
                 # Build your test container image
                 docker build -t test-runner .
-                # Run Django's native test runner inside the container
-                docker run --rm test-runner python manage.py test
+                # Run the test suite with pytest inside the container
+                docker run --rm test-runner pytest
             '''
-        }
+            }
         }
 
         stage('Build & Push Production Image') {
