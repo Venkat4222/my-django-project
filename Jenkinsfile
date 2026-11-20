@@ -29,9 +29,19 @@ pipeline {
             steps {
                 sh '''
                     docker build -t $IMAGE_NAME:latest .
-                    # If pushing to a registry, ensure docker login is configured on the agent
-                    docker push $IMAGE_NAME:latest
                 '''
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKERHUB_USERNAME',
+                    passwordVariable: 'DOCKERHUB_TOKEN'
+                )]) {
+                    sh '''
+                        set +x
+                        trap 'docker logout docker.io >/dev/null 2>&1 || true' EXIT
+                        printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin docker.io
+                        docker push "$IMAGE_NAME:latest"
+                    '''
+                }
             }
         }
 
