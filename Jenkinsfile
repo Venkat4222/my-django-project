@@ -21,4 +21,15 @@ pipeline {
             }
         }
     }
+    post {
+        success {
+      echo 'Django tests passed on agent.'
+    }
+    failure {
+      echo 'Django tests failed on agent.'
+    }
+        always {
+            sh 'docker image prune -f'
+        }
+    }
 }
