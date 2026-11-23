@@ -1,35 +1,28 @@
 pipeline {
-    agent {node{ label 'docker-node' }} // Runs this pipeline on any agent tagged with 'docker-node'
-    
+    agent none
+
     stages {
-        stage('Checkout Code') {
+        stage('Test on AWS Agent') {
+            agent { label 'docker-node' }
             steps {
                 checkout scm
+                sh 'hostname && docker --version'
+                sh 'pytest'
             }
         }
 
-        
-
-        stage('Run Tests in Container') {
+        stage('Build & Push to Docker Hub') {
+            agent { label 'docker-node' }
             steps {
-            sh '''
-                # Build your test container image
-                docker build -t test-runner .
-                # Run the test suite with pytest inside the container
-                docker run --rm test-runner pytest
-            '''
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
+                    sh '''
+                        echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
+                        docker build -t venkat4222/my-python-project:${BUILD_NUMBER} -t venkat4222/my-python-project:latest .
+                        docker push venkat4222/my-python-project:${BUILD_NUMBER}
+                        docker push venkat4222/my-python-project:latest
+                    '''
+                }
             }
-        }
-    }
-    post {
-        success {
-      echo 'Django tests passed on agent.'
-    }
-    failure {
-      echo 'Django tests failed on agent.'
-    }
-        always {
-            sh 'docker image prune -f'
         }
     }
 }
