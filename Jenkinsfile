@@ -16,19 +16,13 @@ pipeline {
     agent none
 
     stages {
-        stage('Notify Pending') {
-            agent { label 'aws-ec2-docker' }
-            steps {
-                script {
-                    setGithubStatus('pending', 'Jenkins build running on AWS agent')
-                }
-            }
-        }
-
         stage('Test on AWS Agent') {
             agent { label 'aws-ec2-docker' }
             steps {
                 checkout scm
+                script {
+                    setGithubStatus('pending', 'Jenkins build running on AWS agent')
+                }
                 sh 'hostname && id && docker --version'
                 sh 'if command -v pytest >/dev/null 2>&1; then pytest; else echo "pytest not installed on agent; skipping or run inside Docker"; fi'
             }
@@ -37,7 +31,7 @@ pipeline {
         stage('Build & Push to Docker Hub') {
             agent { label 'aws-ec2-docker' }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
                     sh '''
                         echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
                         docker build -t venkat4222/my-python-project:${BUILD_NUMBER} -t venkat4222/my-python-project:latest .
@@ -51,13 +45,17 @@ pipeline {
 
     post {
         success {
-            script {
-                setGithubStatus('success', "Build #${env.BUILD_NUMBER} succeeded")
+            node('aws-ec2-docker') {
+                script {
+                    setGithubStatus('success', "Build #${env.BUILD_NUMBER} succeeded")
+                }
             }
         }
         failure {
-            script {
-                setGithubStatus('failure', "Build #${env.BUILD_NUMBER} failed")
+            node('aws-ec2-docker') {
+                script {
+                    setGithubStatus('failure', "Build #${env.BUILD_NUMBER} failed")
+                }
             }
         }
     }
