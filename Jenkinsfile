@@ -1,15 +1,16 @@
 def setGithubStatus(String state, String description) {
-    withCredentials([string(credentialsId: 'github-status-token', variable: 'GH_TOKEN')]) {
-        sh """
-            curl -sS -X POST \
-              -H "Authorization: Bearer ${GH_TOKEN}" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/Venkat4222/my-django-project/statuses/${env.GIT_COMMIT}" \
-              -d "{\\"state\\": \\"${state}\\", \\"target_url\\": \\"${env.BUILD_URL}\\", \\"description\\": \\"${description}\\", \\"context\\": \\"ci/jenkins-aws-docker\\"}"
-        """
+    node('aws-ec2-docker') {
+        withCredentials([string(credentialsId: 'github-status-token', variable: 'GH_TOKEN')]) {
+            sh """
+                curl -sS -X POST \\
+                  -H "Authorization: Bearer \$GH_TOKEN" \\
+                  -H "Accept: application/vnd.github+json" \\
+                  "https://api.github.com/repos/Venkat4222/my-django-project/statuses/${env.GIT_COMMIT}" \\
+                  -d '{\"state\": \"${state}\", \"target_url\": \"${env.BUILD_URL}\", \"description\": \"${description}\", \"context\": \"ci/jenkins-aws-docker\"}'
+            """
+        }
     }
 }
-
 pipeline {
     agent none
 
